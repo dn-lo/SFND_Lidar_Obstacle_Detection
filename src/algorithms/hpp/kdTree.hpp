@@ -1,5 +1,31 @@
 // KD-Tree implementation
-#include "kdTree.h"
+
+#include <vector>
+
+// Class to represent node of KD-Ttree
+struct Node
+{
+	std::vector<float> point;
+	int id;
+	Node* left;
+	Node* right;
+
+	Node(std::vector<float> arr, int setId) : point(arr), id(setId), left(nullptr), right(nullptr) {}
+};
+
+// KdTree class
+struct KdTree
+{
+	Node* root;
+
+	KdTree() : root(nullptr) {}
+	void insert(std::vector<float> point, int id);
+	std::vector<int> search(std::vector<float> target, float distanceTol);
+
+	private:
+		void _insertHelper(Node* &cur, Node* node, uint depth=0);
+		void _searchHelper(Node* &cur, std::vector<float> &target, std::vector<int> &ids, float distanceTol, uint depth=0);
+};
 
 // Insert new node in tree
 void KdTree::insert(std::vector<float> point, int id)
@@ -72,6 +98,3 @@ void KdTree::_searchHelper(Node* &cur, std::vector<float> &target, std::vector<i
 			_searchHelper(cur->right, target, ids, distanceTol, depth);
 	}
 }
-
-
-

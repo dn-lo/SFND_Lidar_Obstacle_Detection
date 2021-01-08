@@ -1,5 +1,4 @@
-/* \author Aaron Brown */
-// Create simple 3d highway enviroment using PCL
+// Process 3d highway enviroment using PCL and implemented functions
 // for exploring self-driving car sensors
 
 #include "sensors/lidar.h"
@@ -7,9 +6,12 @@
 #include "processPointClouds.h"
 // using templates for processPointClouds so also include .cpp to help linker
 #include "processPointClouds.cpp"
+// using implemented algorithms for RANSAC and clustering (also include .cpp to help linker since you are including header)
 #include "algorithms/ransacPlane.h"
-// using templates for ransacPlane so also include .cpp to help linker
 #include "algorithms/ransacPlane.cpp"
+#include "algorithms/euclideanCluster.h"
+#include "algorithms/euclideanCluster.cpp"
+
 
 void cityBlock(pcl::visualization::PCLVisualizer::Ptr& viewer, ProcessPointClouds<pcl::PointXYZI>& pointProcessorI, const pcl::PointCloud<pcl::PointXYZI>::Ptr& pointCloud)
 {
@@ -18,40 +20,41 @@ void cityBlock(pcl::visualization::PCLVisualizer::Ptr& viewer, ProcessPointCloud
     // ----------------------------------------------------
 
     // Filter input PCD to downsample it on a grid and select a box region of interest
-    pcl::PointCloud<pcl::PointXYZI>::Ptr filterCloud = pointProcessorI.FilterCloud(pointCloud, 0.25, Eigen::Vector4f(-10., -6., -3., 1), Eigen::Vector4f(30., +6., 3., 1));
-    // Render filtered PCD on viewer
-    // renderPointCloud(viewer, filterCloud, "filterCloud");
+    pcl::PointCloud<pcl::PointXYZI>::Ptr filterCloud = pointProcessorI.FilterCloud(pointCloud, 0.19, Eigen::Vector4f(-10., -5, -3., 1), Eigen::Vector4f(30., +6.5, 3., 1));
 
-    // // Segment point cloud using RANSAC - PCL implementation
+    // Segment point cloud using RANSAC - PCL implementation
     // std::pair<pcl::PointCloud<pcl::PointXYZI>::Ptr, pcl::PointCloud<pcl::PointXYZI>::Ptr> segmentCloud = pointProcessorI.SegmentPlane(filterCloud, 100, 0.2);
+    
     // Segment point cloud using RANSAC - my implementation ransacPlane
-    auto segmentCloud = ransacPlane<pcl::PointXYZI>(filterCloud, 100, 0.1);
+    auto segmentCloud = ransacPlane<pcl::PointXYZI>(filterCloud, 100, 0.13);
  
     // Render obstacle point cloud using red and road using green
-    renderPointCloud(viewer, segmentCloud.first, "obstCloud", Color(1,0,0));
+    // renderPointCloud(viewer, segmentCloud.first, "obstCloud", Color(1,0,0));
     renderPointCloud(viewer, segmentCloud.second, "planeCloud", Color(0,1,0));
 
-    // // Cluster obstacle point cloud
-    // std::vector<pcl::PointCloud<pcl::PointXYZI>::Ptr> cloudClusters = pointProcessorI.Clustering(segmentCloud.first, 0.4, 10, 500);
+    // Cluster obstacle point cloud - PCL implementation
+    // std::vector<pcl::PointCloud<pcl::PointXYZI>::Ptr> cloudClusters = pointProcessorI.Clustering(segmentCloud.first, 0.45, 9, 500);
+
+    // Cluster obstacle point cloud - my implementation euclideanCluster
+    std::vector<pcl::PointCloud<pcl::PointXYZI>::Ptr> cloudClusters = euclideanCluster<pcl::PointXYZI>(segmentCloud.first, 0.435, 14, 1000);
     
-    // // Use rgb colors
-    // std::vector<Color> colors = {Color(1,0,0), Color(1,1,0), Color(0,0,1)};
+    // Use rgb colors
+    std::vector<Color> colors = {Color(1,0,0), Color(1,1,0), Color(0,0,1)};
 
-    // // render each cluster with a different color    
-    // int clusterId = 0;
-    // for(pcl::PointCloud<pcl::PointXYZI>::Ptr cluster : cloudClusters)
-    // {
-    //     std::cout << "cluster size ";
-    //     pointProcessorI.numPoints(cluster);
-    //     renderPointCloud(viewer,cluster,"obstCloud"+std::to_string(clusterId), colors[clusterId % colors.size()]);
+    // Render each cluster with a different color    
+    int clusterId = 0;
+    for(pcl::PointCloud<pcl::PointXYZI>::Ptr cluster : cloudClusters)
+    {
+        std::cout << "cluster size ";
+        pointProcessorI.numPoints(cluster);
+        renderPointCloud(viewer,cluster,"obstCloud"+std::to_string(clusterId), colors[clusterId % colors.size()]);
 
-    //     // Also render bounding box
-    //     Box box = pointProcessorI.BoundingBox(cluster);
+        // Also render bounding box
+        Box box = pointProcessorI.BoundingBox(cluster);
+        renderBox(viewer, box, clusterId);
 
-    //     renderBox(viewer, box, clusterId);
-
-    //     ++clusterId;
-    // }
+        ++clusterId;
+    }
 }
 
 
@@ -88,7 +91,6 @@ int main (int argc, char** argv)
     initCamera(setAngle, viewer);
 
     // Create point processor with x, y, z and intensity
-    // On the stack (return object)
     ProcessPointClouds<pcl::PointXYZI> pointProcessorI;
 
     // You tell streamPcd a directory that contains all the sequentially ordered pcd files you want to process, 
@@ -98,8 +100,6 @@ int main (int argc, char** argv)
     auto streamItr = stream.begin();
     pcl::PointCloud<pcl::PointXYZI>::Ptr pointCloud;
 
-    // simpleHighway(viewer);
-
     // PCL viewer update loop
     while (!viewer->wasStopped ())
     {
@@ -107,15 +107,20 @@ int main (int argc, char** argv)
         viewer->removeAllPointClouds();
         viewer->removeAllShapes();
 
+        // Render plain PCD
+        // renderPointCloud(viewer, pointCloud, "pointCloud");
+
         // Load pcd and run obstacle detection process
         pointCloud = pointProcessorI.loadPcd((*streamItr).string());
         cityBlock(viewer, pointProcessorI, pointCloud);
+
 
         // Go to next PCD file
         streamItr++;
         if(streamItr == stream.end())
             streamItr = stream.begin();
 
-        viewer->spinOnce(500);
+        // Used to modify update rate
+        viewer->spinOnce(200);
     } 
 }

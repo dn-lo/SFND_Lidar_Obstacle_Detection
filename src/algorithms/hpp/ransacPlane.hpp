@@ -1,6 +1,9 @@
 // RANSAC plane fitting
 
-#include "ransacPlane.h"
+#include <pcl/point_cloud.h>
+#include <unordered_set>
+#include <iostream>
+#include <chrono>
 
 // Separate input cloud into obstacle and road using RANSAC
 template<typename PointT>

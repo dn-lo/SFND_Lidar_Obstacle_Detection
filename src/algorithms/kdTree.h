@@ -1,9 +1,13 @@
 // KD-Tree implementation
 
-#include "../../render/render.h"
+#ifndef KDTREE_H_
+#define KDTREE_H_
 
+#include <vector>
+#include <cmath>
+typedef unsigned int uint;
 
-// Structure to represent node of kd tree
+// Class to represent node of KD-Ttree
 struct Node
 {
 	std::vector<float> point;
@@ -11,11 +15,10 @@ struct Node
 	Node* left;
 	Node* right;
 
-	Node(std::vector<float> arr, int setId)
-	:	point(arr), id(setId), left(nullptr), right(nullptr)
-	{}
+	Node(std::vector<float> arr, int setId) : point(arr), id(setId), left(nullptr), right(nullptr) {}
 };
 
+// KdTree class
 struct KdTree
 {
 	Node* root;
@@ -29,6 +32,7 @@ struct KdTree
 		void _searchHelper(Node* &cur, std::vector<float> &target, std::vector<int> &ids, float distanceTol, uint depth=0);
 };
 
+#endif
 
 
 

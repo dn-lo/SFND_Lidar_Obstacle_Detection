@@ -46,8 +46,8 @@ typename pcl::PointCloud<PointT>::Ptr ProcessPointClouds<PointT>::FilterCloud(ty
     // Crop points on roof using CropBox
     crop.setNegative(true) ;
     crop.setInputCloud(filterCloud);
-    crop.setMin(Eigen::Vector4f(-1.6, -1.7, -3., 1));
-    crop.setMax(Eigen::Vector4f( 2.6,  1.7,  3., 1));
+    crop.setMin(Eigen::Vector4f(-1.6, -1.6, -3., 1));
+    crop.setMax(Eigen::Vector4f( 2.6,  1.6,  3., 1));
     crop.filter(*filterCloud);
 
     auto endTime = std::chrono::steady_clock::now();
