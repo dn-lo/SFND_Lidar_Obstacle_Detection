@@ -5,6 +5,7 @@
 
 #include <vector>
 #include <cmath>
+#include <iostream>
 typedef unsigned int uint;
 
 // Class to represent node of KD-Ttree
@@ -24,8 +25,12 @@ struct KdTree
 	Node* root;
 
 	KdTree() : root(nullptr) {}
+	~KdTree();
+
 	void insert(std::vector<float> point, int id);
 	std::vector<int> search(std::vector<float> target, float distanceTol);
+
+	void deleteSubtree(Node* subtreeRootPtr);
 
 	private:
 		void _insertHelper(Node* &cur, Node* node, uint depth=0);

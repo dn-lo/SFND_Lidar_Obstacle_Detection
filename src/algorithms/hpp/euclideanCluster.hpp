@@ -75,6 +75,9 @@ std::vector<typename pcl::PointCloud<PointT>::Ptr> euclideanCluster(typename pcl
             cluster->points.push_back(cloud->points[idx]);
 		clusters.push_back(cluster);
   	}
+	  
+	// Delete tree by calling its destructor: this avoids memory leak
+	delete tree;
 
 	// End of clustering process
 	auto endTime = std::chrono::steady_clock::now();

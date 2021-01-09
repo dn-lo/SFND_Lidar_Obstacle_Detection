@@ -1,6 +1,14 @@
 // KD-Tree implementation
 #include "kdTree.h"
 
+// Tree destructor uses helper fcn destroySubtree and sets root pointer to null
+// Needed to avoid memory leak
+KdTree::~KdTree() {
+	deleteSubtree(root);
+	// std::cout << "Deleting root pointer" << std::endl;
+	root = nullptr;
+}
+
 // Insert new node in tree
 void KdTree::insert(std::vector<float> point, int id)
 {
@@ -73,5 +81,24 @@ void KdTree::_searchHelper(Node* &cur, std::vector<float> &target, std::vector<i
 	}
 }
 
+// Recursively deletes subtree rooted at a specific node 
+void KdTree::deleteSubtree(Node* subtreeRootPtr) 
+{
+	// Exit if we reached end of the tree (pointer is null)
+	if (!subtreeRootPtr) 
+		return;
+	
+	// Else use a post-order traversal to delete children nodes first, then our tree
+	// Calling this function recursively
+	deleteSubtree(subtreeRootPtr->left);
+	deleteSubtree(subtreeRootPtr->right);
 
+	// Clear children pointer
+	subtreeRootPtr->left = nullptr;
+	subtreeRootPtr->right = nullptr;
 
+	// std::cout << "Deleting node " << subtreeRootPtr->id << std::endl;
+
+	// Delete current subtree root node
+	delete subtreeRootPtr;
+}
