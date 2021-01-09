@@ -1,5 +1,4 @@
-/* \author Aaron Brown */
-// Quiz on implementing simple RANSAC line fitting
+// Euclidean clustering implementation
 
 #include "../../render/render.h"
 #include "../../render/box.h"
