@@ -36,7 +36,7 @@ void cityBlock(pcl::visualization::PCLVisualizer::Ptr& viewer, ProcessPointCloud
     // std::vector<pcl::PointCloud<pcl::PointXYZI>::Ptr> cloudClusters = pointProcessorI.Clustering(segmentCloud.first, 0.45, 9, 500);
 
     // Cluster obstacle point cloud - my implementation euclideanCluster
-    std::vector<pcl::PointCloud<pcl::PointXYZI>::Ptr> cloudClusters = euclideanCluster<pcl::PointXYZI>(segmentCloud.first, 0.435, 14, 1000);
+    std::vector<pcl::PointCloud<pcl::PointXYZI>::Ptr> cloudClusters = euclideanCluster<pcl::PointXYZI>(segmentCloud.first, 0.435, 15, 700);
     
     // Use rgb colors
     std::vector<Color> colors = {Color(1,0,0), Color(1,1,0), Color(0,0,1)};
@@ -121,6 +121,6 @@ int main (int argc, char** argv)
             streamItr = stream.begin();
 
         // Used to modify update rate
-        viewer->spinOnce(200);
+        viewer->spinOnce(500);
     } 
 }
